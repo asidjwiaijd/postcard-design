@@ -1,0 +1,21 @@
+services:
+  postcard:
+    build: .
+    image: postcard-design:latest
+    container_name: postcard
+    restart: unless-stopped
+    ports:
+      # 主机端口用 .env 里的 APP_PORT 覆盖，容器内固定 3000
+      - "${APP_PORT:-3000}:3000"
+    env_file:
+      - .env
+    environment:
+      DATA_DIR: /data
+    volumes:
+      # 数据库和所有图片都在这里，备份直接打包这个目录
+      - ./data:/data
+    # 提交时 sharp 会同时压两张 1819×1252 的图，给够内存
+    deploy:
+      resources:
+        limits:
+          memory: 1500M

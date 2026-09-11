@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+@import "@fontsource/zcool-kuaile/chinese-simplified.css";
+@import "@fontsource/zcool-kuaile/latin.css";
+@import "@fontsource/zcool-xiaowei/chinese-simplified.css";
+@import "@fontsource/ma-shan-zheng/chinese-simplified.css";
+@import "lxgw-wenkai-webfont/lxgwwenkai-regular.css";
+
+@theme {
+  --color-sakura-50: #fff5f9;
+  --color-sakura-100: #ffe7f0;
+  --color-sakura-200: #ffcfe1;
+  --color-sakura-300: #ffa9c8;
+  --color-sakura-400: #ff7fa8;
+  --color-sakura-500: #ff5c91;
+  --color-sakura-600: #ec3b76;
+  --color-sakura-700: #c72a5e;
+
+  --color-iris-100: #eeeaff;
+  --color-iris-200: #ddd5ff;
+  --color-iris-400: #a394ff;
+  --color-iris-500: #7c6cf6;
+  --color-iris-600: #6151dd;
+
+  --color-cream-100: #fff8e6;
+  --color-cream-300: #ffe1a3;
+  --color-cream-500: #ffc93c;
+
+  --color-ink-400: #8b8296;
+  --color-ink-600: #5b5266;
+  --color-ink-800: #372f42;
+  --color-ink-900: #241d2e;
+
+  --font-cute: "ZCOOL KuaiLe", system-ui, sans-serif;
+  --font-kai: "LXGW WenKai", serif;
+}
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --page-bg: #fdf7fb;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--page-bg);
+    color: var(--color-ink-800);
+    font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+}
+
+@layer components {
+  /* 页面底噪：柔和渐变 + 细网点，二次元底子 */
+  .bg-dreamy {
+    background-color: #fdf7fb;
+    background-image:
+      radial-gradient(1100px 520px at 8% -8%, #ffe3ef 0%, transparent 62%),
+      radial-gradient(900px 480px at 105% 4%, #e8e2ff 0%, transparent 58%),
+      radial-gradient(700px 420px at 50% 108%, #fff2d6 0%, transparent 62%);
+  }
+  .bg-dots::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: radial-gradient(currentColor 1px, transparent 1px);
+    background-size: 22px 22px;
+    color: #ff7fa8;
+    opacity: 0.07;
+  }
+
+  .font-cute {
+    font-family: var(--font-cute);
+  }
+  .font-kai {
+    font-family: var(--font-kai);
+  }
+
+  /* 卡片：厚描边 + 柔和投影，是整站的基本单元 */
+  .card-soft {
+    background: #fff;
+    border: 1.5px solid var(--color-sakura-200);
+    border-radius: 1.25rem;
+    box-shadow: 0 10px 30px -14px rgba(236, 59, 118, 0.28);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+    user-select: none;
+    white-space: nowrap;
+  }
+  .btn:active:not(:disabled) {
+    transform: translateY(1px) scale(0.99);
+  }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--color-sakura-400), var(--color-sakura-600));
+    color: #fff;
+    box-shadow: 0 8px 20px -8px rgba(236, 59, 118, 0.7);
+  }
+  .btn-primary:hover:not(:disabled) {
+    box-shadow: 0 12px 26px -8px rgba(236, 59, 118, 0.8);
+  }
+  .btn-ghost {
+    background: #fff;
+    color: var(--color-ink-600);
+    border: 1.5px solid var(--color-sakura-200);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--color-sakura-50);
+  }
+
+  .input {
+    width: 100%;
+    border: 1.5px solid var(--color-sakura-200);
+    background: #fff;
+    border-radius: 0.85rem;
+    padding: 0.6rem 0.9rem;
+    outline: none;
+    font-size: 0.95rem;
+  }
+  .input:focus {
+    border-color: var(--color-sakura-400);
+    box-shadow: 0 0 0 3px var(--color-sakura-100);
+  }
+
+  /* 编辑器里滚动条不要太抢眼 */
+  .thin-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .thin-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-sakura-200);
+    border-radius: 99px;
+  }
+  .thin-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* 斜着流动的作品墙：列内容复制了一份，走到 -50% 正好接回开头 */
+  @keyframes pc-flow-up {
+    from { transform: translateY(0); }
+    to { transform: translateY(-50%); }
+  }
+  @keyframes pc-flow-down {
+    from { transform: translateY(-50%); }
+    to { transform: translateY(0); }
+  }
+  .pc-flow-col {
+    animation: pc-flow-up var(--dur, 60s) linear infinite;
+    will-change: transform;
+  }
+  .pc-flow-col[data-rev] {
+    animation-name: pc-flow-down;
+  }
+  /* 鼠标停上去就停下来，方便看清某一张 */
+  .pc-flow:hover .pc-flow-col {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
