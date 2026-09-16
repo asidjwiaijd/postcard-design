@@ -63,6 +63,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   review_note TEXT NOT NULL DEFAULT '',
   reviewed_at INTEGER,
   printed     INTEGER NOT NULL DEFAULT 0,
+  copies      INTEGER NOT NULL DEFAULT 1,   -- 这一张印几份，后台改
   created_at  INTEGER NOT NULL,
   updated_at  INTEGER NOT NULL
 );

@@ -24,7 +24,7 @@ export interface SubmissionRow {
   front_key: string; back_key: string; thumb_key: string;
   front_bytes: number; back_bytes: number;
   status: string; review_note: string; reviewed_at: number | null;
-  printed: number; created_at: number; updated_at: number;
+  printed: number; copies: number; created_at: number; updated_at: number;
 }
 
 // ---------------------------------------------------------------- 邀请
@@ -245,9 +245,11 @@ export const countAllSubmissions = () =>
     `SELECT COUNT(*) AS n FROM submissions WHERE status != 'rejected'`,
   )!.n;
 
+/** 每个状态下有几份稿件、加起来要印几张 */
 export const submissionStats = () =>
-  all<{ status: string; n: number }>(
-    `SELECT status, COUNT(*) AS n FROM submissions GROUP BY status`,
+  all<{ status: string; n: number; copies: number }>(
+    `SELECT status, COUNT(*) AS n, COALESCE(SUM(copies), 0) AS copies
+     FROM submissions GROUP BY status`,
   );
 
 export function reviewSubmission(id: string, status: string, note: string) {
@@ -257,6 +259,13 @@ export function reviewSubmission(id: string, status: string, note: string) {
   );
   return getSubmission(id);
 }
+/** 这一张印几份。0 = 这次不印（留着但不进印刷量） */
+export function setCopies(id: string, copies: number) {
+  const n = Math.max(0, Math.min(9999, Math.round(copies)));
+  run(`UPDATE submissions SET copies = ?, updated_at = ? WHERE id = ?`, n, now(), id);
+  return getSubmission(id);
+}
+
 export function setPrinted(id: string, printed: boolean) {
   run(`UPDATE submissions SET printed = ?, updated_at = ? WHERE id = ?`, printed ? 1 : 0, now(), id);
   return getSubmission(id);

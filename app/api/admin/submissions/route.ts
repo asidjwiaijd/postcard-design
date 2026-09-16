@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
   const rows = listSubmissions(status, limit, offset).map((s) => ({
     id: s.id, title: s.title, note: s.note, status: s.status, reviewNote: s.review_note,
-    printed: !!s.printed, qq: s.qq, nickname: s.nickname,
+    printed: !!s.printed, copies: s.copies, qq: s.qq, nickname: s.nickname,
     thumb: `/api/media/${s.thumb_key}`,
     front: `/api/media/${s.front_key}`,
     back: `/api/media/${s.back_key}`,
@@ -20,6 +20,13 @@ export async function GET(req: NextRequest) {
   }));
 
   const stats: Record<string, number> = { pending: 0, approved: 0, rejected: 0 };
-  for (const r of submissionStats()) stats[r.status] = r.n;
-  return NextResponse.json({ submissions: rows, stats });
+  // copies = 这个状态下所有稿件的份数之和，也就是实际要印多少张
+  const copies: Record<string, number> = { pending: 0, approved: 0, rejected: 0 };
+  for (const r of submissionStats()) {
+    stats[r.status] = r.n;
+    copies[r.status] = r.copies;
+  }
+  stats.all = stats.pending + stats.approved + stats.rejected;
+  copies.all = copies.pending + copies.approved + copies.rejected;
+  return NextResponse.json({ submissions: rows, stats, copies });
 }

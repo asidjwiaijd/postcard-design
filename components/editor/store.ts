@@ -58,6 +58,10 @@ interface EditorState {
   nudge: (ids: string[], dx: number, dy: number) => void;
   /** 绕各自中心转 deg 度，中心不动 */
   rotateBy: (ids: string[], deg: number) => void;
+  /** 把一张图撑满整页（含出血），并压到最底下当背景 */
+  fillPage: (id: string) => void;
+  /** 直接铺一张整页背景图。最底下已经铺着一张就换掉它，不往下堆 */
+  addFullPage: (assetId: string, src: string) => void;
   reorder: (id: string, dir: "front" | "back" | "up" | "down") => void;
   setBackground: (fill: Fill) => void;
   /** 换这一面的朝向。rotateContent=true 时内容跟着转 90°，再换回来正好复原 */
@@ -232,6 +236,41 @@ export const useEditor = create<EditorState>((set, get) => ({
     get().end();
   },
 
+  fillPage: (id) => {
+    const { doc, side } = get();
+    const el = doc[side].elements.find((e) => e.id === id);
+    if (!el) return;
+    get().begin();
+    set({
+      doc: withSide(doc, side, (s) => ({
+        ...s,
+        // 铺满整页的图必然挡住其它所有东西，只能当背景，所以顺手压到最底下
+        elements: [fullPageOf(el, !!s.turned), ...s.elements.filter((e) => e.id !== id)],
+      })),
+      selected: [id],
+    });
+    get().end();
+  },
+
+  addFullPage: (assetId, src) => {
+    const { doc, side } = get();
+    const turned = !!doc[side].turned;
+    const bottom = doc[side].elements[0];
+    // 连点几张图不该在纸底下堆一摞永远看不见的，换掉当前那张就行
+    const reuse = bottom && bottom.type === "image" && isFullPage(bottom, turned) ? bottom : null;
+    get().begin();
+    set({
+      doc: withSide(doc, side, (s) =>
+        reuse
+          ? { ...s, elements: s.elements.map((e) => (e.id === reuse.id ? { ...e, assetId, src } : e)) }
+          : { ...s, elements: [makeFullPageImage(assetId, src, turned), ...s.elements] },
+      ),
+    });
+    const added = get().doc[side].elements[0];
+    set({ selected: [added.id] });
+    get().end();
+  },
+
   reorder: (id, dir) => {
     get().begin();
     const { doc, side } = get();
@@ -335,6 +374,46 @@ function rotateAboutCenter<T extends AnyElement>(e: T, deg: number): T {
     x: +(cx + dx * Math.cos(d) - dy * Math.sin(d)).toFixed(2),
     y: +(cy + dx * Math.sin(d) + dy * Math.cos(d)).toFixed(2),
     rotation: +rot.toFixed(2),
+  };
+}
+
+/** 铺满整页 = 占满出血版。判定留 0.2mm 余量，别跟浮点较真 */
+export function isFullPage(e: AnyElement, turned: boolean): boolean {
+  const near = (a: number, b: number) => Math.abs(a - b) < 0.2;
+  return (
+    !e.rotation &&
+    near(e.x, 0) && near(e.y, 0) &&
+    near(e.w, pageW(turned)) && near(e.h, pageH(turned))
+  );
+}
+
+/**
+ * 撑满整页版的同一个元素。图片还要顺手清掉蒙板形状和圆角：
+ * 留着的话四角会露出纸的底色，裁切时就是一圈白边，不算铺满。
+ */
+function fullPageOf(e: AnyElement, turned: boolean): AnyElement {
+  const box = { x: 0, y: 0, w: pageW(turned), h: pageH(turned), rotation: 0 };
+  return e.type === "image"
+    ? { ...e, ...box, frame: undefined, radius: 0, fit: "cover" as const }
+    : { ...e, ...box };
+}
+
+function makeFullPageImage(assetId: string, src: string, turned: boolean): AnyElement {
+  return {
+    id: nanoid(10),
+    type: "image",
+    assetId,
+    src,
+    fit: "cover",
+    x: 0,
+    y: 0,
+    w: pageW(turned),
+    h: pageH(turned),
+    rotation: 0,
+    opacity: 1,
+    radius: 0,
+    borderWidth: 0,
+    borderColor: "#ffffff",
   };
 }
 

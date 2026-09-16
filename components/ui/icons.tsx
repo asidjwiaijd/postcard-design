@@ -51,6 +51,8 @@ const P: Record<string, React.ReactNode> = {
   crop: <><path d="M6.5 2.5v15h15" /><path d="M2.5 6.5h15v15" /></>,
   frame: <><rect x="3.5" y="3.5" width="17" height="17" rx="2.5" /><path d="M3.5 9h17M3.5 15h17M9 3.5v17M15 3.5v17" /></>,
   grid: <><rect x="3" y="3" width="18" height="18" rx="2.5" /><path d="M3 9h18M3 15h18M9 3v18M15 3v18" /></>,
+  // 铺满整页：一个版面加上朝对角撑开的箭头
+  fillPage: <><rect x="2.5" y="4.5" width="19" height="15" rx="2.5" /><path d="M10 14l-3.5 3.5M6.5 17.5v-3M6.5 17.5h3" /><path d="M14 10l3.5-3.5M17.5 6.5v3M17.5 6.5h-3" /></>,
   marquee: <><path d="M4 8V6a2 2 0 0 1 2-2h2" /><path d="M16 4h2a2 2 0 0 1 2 2v2" /><path d="M20 16v2a2 2 0 0 1-2 2h-2" /><path d="M8 20H6a2 2 0 0 1-2-2v-2" /><path d="M11 4h2M11 20h2M4 11v2M20 11v2" /></>,
 
   // ---- 页面朝向

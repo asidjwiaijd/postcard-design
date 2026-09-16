@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useEditor, usePageSize } from "./store";
+import { isFullPage, useEditor, usePageSize } from "./store";
 import { ColorInput, Field, IconBtn, SegBar, Slider } from "@/components/ui/controls";
 import { Icon } from "@/components/ui/icons";
 import { FrameGrid } from "./FrameGrid";
@@ -227,6 +227,7 @@ function ImageProps({
   const natural =
     img && img.naturalWidth && img.naturalHeight ? img.naturalWidth / img.naturalHeight : null;
   const fitted = natural ? Math.abs(el.w / el.h - natural) < 0.004 : false;
+  const full = isFullPage(el, page.turned);
 
   /** 把选框掰回原图比例：面积和中心都保持住，只改长宽，视觉上不会突然蹦一下 */
   function restoreRatio() {
@@ -278,6 +279,22 @@ function ImageProps({
               {img!.naturalWidth}×{img!.naturalHeight}
             </span>
           )}
+        </button>
+      )}
+
+      {el.src && (
+        <button
+          onClick={() => useEditor.getState().fillPage(el.id)}
+          disabled={full}
+          className="btn btn-ghost w-full py-2 text-xs"
+          title={
+            full
+              ? "这张图已经铺满这一面了"
+              : "撑满整版（含出血）并压到最底下当背景。多出来的部分按「填满裁切」裁掉"
+          }
+        >
+          <Icon name="fillPage" size={14} />
+          {full ? "已经铺满这一面" : "铺满整个明信片"}
         </button>
       )}
 

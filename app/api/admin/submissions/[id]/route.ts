@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/adminAuth";
-import { reviewSubmission, setPrinted, getSubmission, deleteSubmission } from "@/lib/repo";
+import { reviewSubmission, setPrinted, setCopies, getSubmission, deleteSubmission } from "@/lib/repo";
 import { storage } from "@/lib/storage";
 
 export async function PATCH(
@@ -12,7 +12,7 @@ export async function PATCH(
   if (!getSubmission(id)) return NextResponse.json({ error: "不存在" }, { status: 404 });
 
   const body = (await req.json().catch(() => ({}))) as {
-    status?: string; reviewNote?: string; printed?: boolean;
+    status?: string; reviewNote?: string; printed?: boolean; copies?: number;
   };
 
   if (body.status) {
@@ -22,6 +22,12 @@ export async function PATCH(
     reviewSubmission(id, body.status, (body.reviewNote ?? "").slice(0, 300));
   }
   if (body.printed !== undefined) setPrinted(id, body.printed);
+  if (body.copies !== undefined) {
+    if (!Number.isFinite(body.copies) || body.copies < 0) {
+      return NextResponse.json({ error: "份数不合法" }, { status: 400 });
+    }
+    setCopies(id, body.copies);
+  }
 
   return NextResponse.json({ ok: true, submission: getSubmission(id) });
 }

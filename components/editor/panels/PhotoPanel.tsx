@@ -158,6 +158,10 @@ export function PhotoPanel({ qq }: { qq: string }) {
         />
       </section>
 
+      <p className="text-ink-400 -mb-1 text-[11px] leading-relaxed">
+        点图片插入画布，点角上的「铺满」把它撑满整张明信片当背景。
+      </p>
+
       {loading ? (
         <Spinner label="加载素材…" />
       ) : assets.length === 0 ? (
@@ -173,6 +177,15 @@ export function PhotoPanel({ qq }: { qq: string }) {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={a.src} alt={a.name} className="aspect-square w-full object-cover" loading="lazy" />
+              </button>
+              {/* 常驻显示，不做 hover 才出现：手机上没有 hover */}
+              <button
+                onClick={() => useEditor.getState().addFullPage(a.id, a.src)}
+                title="用这张图铺满整个明信片，压在最底下当背景"
+                className="bg-ink-900/70 hover:bg-ink-900 absolute bottom-1 left-1 flex items-center gap-0.5 rounded-full py-1 pl-1.5 pr-2 text-[10px] text-white transition"
+              >
+                <Icon name="fillPage" size={11} />
+                铺满
               </button>
               <button
                 onClick={() => remove(a.id)}
